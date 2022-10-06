@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = new DbHelper(this);
 
         ImageList = new ArrayList<URLImage>();
-        imageView=(ImageView)findViewById(R.id.imageView);
+        imageView = (ImageView)findViewById(R.id.imageView);
 
         Cursor cursor = dbHelper.getAll();
         while (cursor.moveToNext()){
@@ -54,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
             String url = ImageList.get(currentPosition).Url;
             new FetchImage(url).start();
         }
-
-        Toast.makeText(MainActivity.this, "Successfully get data", Toast.LENGTH_LONG).show();
 
         binding.clearLink.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
                             last = ImageList.get(ImageList.size()-1).Id;
                             currentPosition = 0;
                         }
-                        Toast.makeText(MainActivity.this, "Save successfully", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Add successfully", Toast.LENGTH_LONG).show();
                     }
                     else{
-                        Toast.makeText(MainActivity.this, "Save fail", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Add fail", Toast.LENGTH_LONG).show();
                     }
                     new FetchImage(url).start();
                 }
@@ -101,18 +99,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 binding.etURL.setText("");
-                if (currentPosition > 0){
-                    currentPosition = currentPosition - 1;
-                    String url = ImageList.get(currentPosition).Url;
-                    new FetchImage(url).start();
-                }
+                Cursor cursor = dbHelper.getAll();
+
                 // Avoid Database empty => Back => ERR case
-                if (currentPosition == 0){
-                    currentPosition = first;
+                if(cursor.getCount() > 0){
+                    if (currentPosition > 0){
+                        currentPosition = currentPosition - 1;
+
+                        String url = ImageList.get(currentPosition).Url;
+                        new FetchImage(url).start();
+                    }
+                    else {
+                        String url = ImageList.get(currentPosition).Url;
+                        new FetchImage(url).start();
+                    }
                 }
                 else {
-                    String url = ImageList.get(currentPosition).Url;
-                    new FetchImage(url).start();
+                    Toast.makeText(MainActivity.this, "No data, please add data first!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -120,15 +123,21 @@ public class MainActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                currentPosition = currentPosition + 1;
                 binding.etURL.setText("");
+                Cursor cursor = dbHelper.getAll();
 
-                if (currentPosition == last){
-                    currentPosition = 0;
+                if(cursor.getCount() > 0){
+                    currentPosition = currentPosition + 1;
+                    if (currentPosition == last){
+                        currentPosition = 0;
+                    }
+                    if (currentPosition <= last){
+                        String url = ImageList.get(currentPosition).Url;
+                        new FetchImage(url).start();
+                    }
                 }
-                if (currentPosition <= last){
-                    String url = ImageList.get(currentPosition).Url;
-                    new FetchImage(url).start();
+                else {
+                    Toast.makeText(MainActivity.this, "No data, please add data first!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
